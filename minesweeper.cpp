@@ -7,35 +7,35 @@
 
 #define H 500
 #define W 600
-#define mH 15 //�c
-#define mW 20 //��
+#define mH 15
+#define mW 20
 #define MINE  1
 #define FLAG  2
 #define RESET 3
-#define AR 0.017453  // ��/180.0 :  �x���烉�W�A����
-#define DENTH 4 //DENTH�}�X��1�n��������
-#define DOUBLECLICK 1 //�_�u���N���b�N (���[�h)
-#define LEFTCLICK   2 //���N���b�N (���[�h)
-#define DOUBLECLICKTIME 0.06 //�_�u���N���b�N�̍Œ��Ԋu(�b)
+#define AR 0.017453
+#define DENTH 4
+#define DOUBLECLICK 1
+#define LEFTCLICK   2
+#define DOUBLECLICKTIME 0.06
 
-const int D = W / mW; //�Z���̑傫��
-const int mTop = H - D * mH; //�Q�[�������̃g�b�v���W
-const int rLeft   = W * 1 / 5;   //���Z�b�g�{�^���̍��W
+const int D = W / mW;
+const int mTop = H - D * mH;
+const int rLeft   = W * 1 / 5;
 const int rRight  = W * 3 / 10;
 const int rTop    = 10;
 const int rBottom = 40;
-int mCount = 0; //���ݖ��܂��Ă����n���̐�
-int mineN = 0; //���܂��Ă����n���̑���
-int openCount = 0; //�J���Ă����Z���̐�
-int initFlag = 0; //�Z���̏������t���O
-int gameoverFlag = 0; //�Q�[���I�[�o�[�t���O
-int gameclearFlag = 0;//�Q�[���N���A�t���O
-time_t start; //�Q�[���J�n����
-const double cColor[3][3] = //�Z���̃J���[����
+int mCount = 0;
+int mineN = 0;
+int openCount = 0;
+int initFlag = 0;
+int gameoverFlag = 0;
+int gameclearFlag = 0;
+time_t start;
+const double cColor[3][3] =
   {{0.8, 0.8, 0.8},  //CLOSE
    {0.8, 0.8, 0.8},  //FRAG
    {0.6, 0.6, 0.6}}; //OPEN
-const double nColor[9][3] = //�����̃J���[����
+const double nColor[9][3] =
   {{1    , 1    , 1    }, //0
    {0    , 0    , 1    }, //1
    {0    , 1    , 0    }, //2
@@ -57,11 +57,11 @@ void gameover();
 
 class Cell {
 public:
-  int x, y;  //�\�����W
-  int num;   //�\�����鐔��
-  int mine;  //�n������������1
-  int mouse; //�}�E�X�����ɂ�������1
-  //double r, g, b; //�F����
+  int x, y;
+  int num;
+  int mine;
+  int mouse;
+
   Status status;
 
   Cell() {}
@@ -142,7 +142,7 @@ double getRnd(int min, int max) {
 }
 
 void strout(int x, int y, char *string)
-{ // (x,y)�ʒu�ɕ�����string���\������
+{
   void *font = GLUT_BITMAP_TIMES_ROMAN_24;
   glRasterPos2i(x, y);
   int len = (int) strlen(string);
@@ -151,7 +151,6 @@ void strout(int x, int y, char *string)
   }
 }
 
-//���Z�b�g
 void reset() {
   init();
   mCount = 0;
@@ -163,9 +162,7 @@ void reset() {
   glClearColor(0.7, 0.7, 0.7, 0.);
 }
 
-//�}�`�̐݌v
 void figureInit() {
-  //�n��
   glNewList( MINE, GL_COMPILE );
     glColor3f(0, 0, 0);
     glBegin(GL_TRIANGLE_FAN);
@@ -179,7 +176,6 @@ void figureInit() {
     glEnd();
   glEndList();
 
-  //��
   glNewList( FLAG, GL_COMPILE );
     glColor3f(1, 0, 0);
     glBegin(GL_POLYGON);
@@ -193,7 +189,6 @@ void figureInit() {
     glEnd();
   glEndList();
 
-  //���Z�b�g�{�^��
   glNewList( RESET, GL_COMPILE );
     glColor3f(0.945, 0.816, 0.251);
     glBegin(GL_TRIANGLE_FAN);
@@ -215,7 +210,6 @@ void edge(int xIndex, int yIndex,
 
 void init() {
   figureInit();
-  //�Z�����쐬
   for (int i = 0; i < mW; i++) {
     for (int j = 0; j < mH; j++) {
       cell[i][j] = Cell(i, j);
@@ -232,7 +226,6 @@ void init(int xIndex, int yIndex) {
       cell[xIndex + k][yIndex + n].mine = 0;
     }
   }
-  //�Z���̎����̒n���̐����v�Z
   left = -1; right = 1; top = -1; bottom = 1;
   for (int i = 0; i < mW; i++) {
     for (int j = 0; j < mH; j++) {
@@ -248,21 +241,20 @@ void init(int xIndex, int yIndex) {
       }
     }
   }
-  mineN = mCount; //�n���̑������o�^
+  mineN = mCount;
   initFlag = 1;
-  start = time(NULL); //�v���J�n
+  start = time(NULL);
 }
 
-//�����̃Z�����J��
 void surroundOpen(int xIndex, int yIndex, int mode) {
   if (gameoverFlag == 0) {
     int left, right, top, bottom;
     edge(xIndex, yIndex, &left, &right, &top, &bottom);
     for (int k = left; k <= right; k++) {
       for (int n = top; n <= bottom; n++) {
-	int cx = xIndex + k, cy = yIndex + n; //�Z����index
+	int cx = xIndex + k, cy = yIndex + n;
 	switch (mode) {
-	case LEFTCLICK: { //���N���b�N
+	case LEFTCLICK: {
 	  if (cell[cx][cy].status == CLOSE) {
 	    if (!(k == 0 && n == 0) && cell[cx][cy].num == 0) {
 	      surroundOpen(cx, cy, LEFTCLICK);
@@ -270,7 +262,7 @@ void surroundOpen(int xIndex, int yIndex, int mode) {
 	    cell[cx][cy].open();
 	  }
 	}
-	case DOUBLECLICK: { //�_�u���N���b�N
+	case DOUBLECLICK: {
 	  if (!(k == 0 && n == 0) && cell[cx][cy].num == 0) {
 	    //surroundOpen(cx, cy, LEFTCLICK);
 	  }
@@ -282,7 +274,6 @@ void surroundOpen(int xIndex, int yIndex, int mode) {
   }
 }
 
-//�n�C�X�R�A�������Ƃ��̏���
 void score() {
   long cleartime = time(NULL) - start;
   long hiscore;
@@ -290,7 +281,6 @@ void score() {
   char fname[10] = "score.txt";
   char s[10];
 
-  //�n�C�X�R�A���t�@�C�������ǂݍ���
   if((fp=fopen(fname,"r"))==NULL) {
     printf("%s�t�@�C�����J���܂����B\n", fname);
     return;
@@ -301,18 +291,13 @@ void score() {
   }
   fclose(fp);
 
-  //�t�@�C���ɕۑ�
   if (cleartime < hiscore) {
     fp=fopen(fname, "w");
     fprintf(fp, "%d\n", cleartime);
   }
   fclose(fp);
-
-  //���ʂɕ\��
-
 }
 
-//�Q�[���I�[�o�[�ɂȂ����Ƃ��̏���
 void gameover() {
   glClearColor(0, 0, 0, 0);
   gameoverFlag = 1;
@@ -325,19 +310,16 @@ void gameover() {
   }
 }
 
-//�N���A�����Ƃ��̏���
 void gameclear() {
   glClearColor(0.961, 0.847, 0.000, 0);
   gameclearFlag = 1;
   score();
 }
 
-//�}�E�X�����Z�b�g�{�^���̏��ɂ�������1,����������0���Ԃ�
 int checkMouseOnReset(int x, int y) {
   return x >= rLeft && x <= rRight && y >= rTop && y <= rBottom;
 }
 
-//�}�E�X���Z���̏��ɂ�������1,�Ȃ�������0���Ԃ�
 int checkMouseOnCell(int x, int y, int *xIndex, int *yIndex) {
   if (x >= 0 && x <= W && y >= mTop && y <= H) {
     *xIndex = x / D;
@@ -349,7 +331,7 @@ int checkMouseOnCell(int x, int y, int *xIndex, int *yIndex) {
 
 void display() {
   glClear(GL_COLOR_BUFFER_BIT);
-  //�Z�����`��
+
   for (int i = 0; i < mW; i++) {
     for (int j = 0; j < mH; j++) {
       cell[i][j].draw();
@@ -364,12 +346,12 @@ void display() {
     char s[12] = "Game Clear!";
     strout(W / 2, 30, s);
   }
-  //�c���n�������\��
+
   glColor3f(0, 0, 1);
   char s[10];
   sprintf(s, "rest:%d", mCount);
   strout(10, 30, s);
-  //���Z�b�g�{�^�����\��
+
   glCallList(RESET);
   glColor3f(0, 0, 0);
   sprintf(s, "reset");
@@ -377,12 +359,10 @@ void display() {
   glutSwapBuffers();
 }
 
-clock_t mouseclickclock = 0; //�O�񍶃N���b�N�����Ƃ��̎���
-int clickCount = 0; //�_�u���N���b�N���ǂ����̔���
-//�}�E�X���N���b�N���ꂽ�Ƃ��̏���
+clock_t mouseclickclock = 0;
+int clickCount = 0;
 void mouseclick(int button, int state, int x, int y) {
   if(state == GLUT_DOWN) {
-    //printf("%d %d %d\n", clock(), mouseclickclock, (clock() - mouseclickclock));
     if ((clock() - mouseclickclock) <= DOUBLECLICKTIME * CLOCKS_PER_SEC) {
       clickCount = (clickCount + 1) % 2;
     } else {
@@ -391,14 +371,9 @@ void mouseclick(int button, int state, int x, int y) {
     if (gameoverFlag == 0 && gameclearFlag == 0) {
       int xIndex, yIndex;
       switch (button) {
-      case GLUT_LEFT_BUTTON:  //���N���b�N
+      case GLUT_LEFT_BUTTON:
 	{
 	  if(checkMouseOnCell(x, y, &xIndex, &yIndex)) {
-	    /*if (clickCount == 1) {
-	      //�_�u���N���b�N����
-	      surroundOpen(xIndex, yIndex, DOUBLECLICK);
-	      } else { */
-	      //���N���b�N����
 	      if (cell[xIndex][yIndex].status == CLOSE) {
 		if (initFlag == 0) {
 		  init(xIndex, yIndex);
@@ -415,10 +390,9 @@ void mouseclick(int button, int state, int x, int y) {
 	  mouseclickclock = clock();
 	  break;
 	}
-      case GLUT_RIGHT_BUTTON: //�E�N���b�N
+      case GLUT_RIGHT_BUTTON:
 	{
 	  if(checkMouseOnCell(x, y, &xIndex, &yIndex)) {
-	    //FRAG��CLOSE���`�F���W
 	    if (cell[xIndex][yIndex].status == CHECK) {
 	      cell[xIndex][yIndex].close();
 	    } else if (cell[xIndex][yIndex].status == CLOSE) {
@@ -428,7 +402,7 @@ void mouseclick(int button, int state, int x, int y) {
 	  }
 	  break;
 	}
-      default: break; //�������Ȃ�
+      default: break;
       }
     }
     if (checkMouseOnReset(x, y)) {
@@ -437,8 +411,7 @@ void mouseclick(int button, int state, int x, int y) {
   }
 }
 
-int mx, my; //�}�E�X�����ǂ̃Z���ɂ��邩(�Z����index)
-//�}�E�X���������Ƃ��̏���
+int mx, my;
 void passivemousemotion(int x, int y) {
   cell[mx][my].mouse = 0;
   if (checkMouseOnCell(x, y, &mx, &my)) {
@@ -447,10 +420,8 @@ void passivemousemotion(int x, int y) {
   }
 }
 
-//�L�[�������ꂽ�Ƃ��̏���
 void keyboard(unsigned char key, int x, int y) {
   switch (key) {
-    // ESC �܂��� enter ���^�C�v�������I��
   case '\033': case 13: exit(0);
   }
 }
